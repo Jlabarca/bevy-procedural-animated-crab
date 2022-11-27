@@ -3,6 +3,11 @@ name = "bevy-procedural-animated-spider"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[profile.dev.package."*"]
+opt-level = 3
 
 [dependencies]
+bevy = "0.9.0"
+#bevy_rapier3d = "0.19.0"
+bevy_rapier3d = { version = "0.19.0", features = [ "simd-stable", "debug-render" ] }
+bevy_mod_wanderlust =  { version = "0.2.3", path = "../bevy_mod_wanderlust" }
