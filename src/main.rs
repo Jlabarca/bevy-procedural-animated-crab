@@ -1,8 +1,13 @@
 mod input_controller;
-use bevy::{prelude::*, render::camera::ScalingMode, math::vec3};
+use bevy::{math::vec3, prelude::*, render::camera::ScalingMode};
+use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_mod_wanderlust::{CharacterControllerBundle, ControllerPhysicsBundle};
 use bevy_rapier3d::prelude::*;
 use input_controller::InputControllerPlugin;
+use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridPlugin, InfiniteGrid};
+
+#[derive(Component, Default, Reflect)]
+struct Player {}
 
 fn main() {
     App::new()
@@ -10,13 +15,32 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(InputControllerPlugin)
+        .add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(InfiniteGridPlugin)
         .add_startup_system(setup_graphics)
         .add_startup_system(setup_physics)
-        //.add_system(print_ball_altitude)
+        .add_startup_system(handle_procedural_animation)
+        .add_system(spider_walk_system)
+        .add_system(print_ball_altitude)
         .run();
 }
 
-fn setup_graphics(mut commands: Commands) {
+fn handle_procedural_animation(
+    mut commands: Commands
+) {
+    create_prismatic_joints(&mut commands, Vec3::new(0.0, 0.0, 0.0), 5);
+}
+fn create_prismatic_joints(
+    commands: &mut Commands,
+    origin: Vect,
+    num: usize,
+) {
+
+}
+
+
+fn setup_graphics(mut commands: Commands,
+    mut materials: ResMut<Assets<StandardMaterial>>,) {
     // Add a camera so we can see the debug-render.
     commands.spawn(Camera3dBundle {
         projection: OrthographicProjection {
@@ -40,6 +64,14 @@ fn setup_graphics(mut commands: Commands) {
         )),
         ..default()
     });
+    // grid
+    commands.spawn(InfiniteGridBundle {
+        grid: InfiniteGrid {
+            // shadow_color: None,
+            ..Default::default()
+        },
+        ..Default::default()
+    });
 }
 
 const DEFAULT_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
@@ -47,18 +79,30 @@ const OBJECT_COLOR: Color = Color::rgb(0.3, 0.5, 0.3);
 
 fn setup_physics(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    /* Create the ground. */
+    /* Create the ground */
     let cube_width = 100.0;
     let cube_position = Transform::from_xyz(0.0, -2.0, 0.0);
     let cube_mesh_handle = meshes.add(Mesh::from(shape::Box::new(cube_width, 0.5, cube_width)));
+    let texture_handle = asset_server.load("resources/tile.png");
+
+
+    // this material renders the texture normally
+    let material_handle = materials.add(StandardMaterial {
+        base_color_texture: Some(texture_handle.clone()),
+        alpha_mode: AlphaMode::Blend,
+        //unlit: true,
+        ..default()
+    });
+
     commands.spawn((
         Collider::cuboid(cube_width, 0.5, cube_width),
         PbrBundle {
             mesh: cube_mesh_handle.clone(),
-            material: materials.add(DEFAULT_COLOR.into()),
+            material: material_handle,
             transform: Transform {
                 translation: cube_position.translation,
                 //rotation: Quat::from_rotation_x(-1.5708),
@@ -96,10 +140,16 @@ fn setup_physics(
     //spawn_cubes(&mut commands, &mut meshes, &mut materials);
 }
 
-fn print_ball_altitude(positions: Query<&Transform, With<RigidBody>>) {
+fn print_ball_altitude(positions: Query<&Transform, With<Player>>) {
     for transform in positions.iter() {
-        println!("Ball altitude: {}", transform.translation.y);
+        println!("Player altitude: {}", transform.translation.y);
     }
+}
+
+fn spider_walk_system(positions: Query<&Transform, With<RigidBody>>) {
+    // for transform in positions.iter() {
+    //     println!("Ball altitude: {}", transform.translation.y);
+    // }
 }
 
 fn spawn_cubes(
@@ -153,78 +203,132 @@ fn spawn_spider(
     position: Vec3,
     radius: f32,
 ) {
-    let ec = commands
-        .spawn(
-            CharacterControllerBundle {
-                physics: ControllerPhysicsBundle {
-                            rigidbody: RigidBody::Dynamic,
-                            collider: Collider::capsule(vec3(0.0, 0.0, 0.0), vec3(0.0, 1., 0.0), 1.),
-                            velocity: default(),
-                            gravity: GravityScale(0.0),
-                            friction: Friction {
-                                coefficient: 0.0,
-                                combine_rule: CoefficientCombineRule::Min,
-                            },
-                            damping: Damping {
-                                linear_damping: 0.0,
-                                angular_damping: 0.0,
-                            },
-                            restitution: Restitution {
-                                coefficient: 0.0,
-                                combine_rule: CoefficientCombineRule::Min,
-                            },
-                            read_mass_properties: default(),
-                            ..default()
-                        },
+    //araña body
+    let mut parent_entity = commands
+        .spawn(CharacterControllerBundle {
+            physics: ControllerPhysicsBundle {
+                rigidbody: RigidBody::Dynamic,
+                collider: Collider::capsule(vec3(0.0, 0.0, 0.0), vec3(0.0, 1., 0.0), 1.),
+                velocity: default(),
+                gravity: GravityScale(0.0),
+                friction: Friction {
+                    coefficient: 0.0,
+                    combine_rule: CoefficientCombineRule::Min,
+                },
+                damping: Damping {
+                    linear_damping: 0.0,
+                    angular_damping: 0.0,
+                },
+                restitution: Restitution {
+                    coefficient: 0.0,
+                    combine_rule: CoefficientCombineRule::Min,
+                },
+                read_mass_properties: default(),
                 ..default()
-            }
-        );
+            },
+            ..default()
+        })
+        .insert(Player::default())
+        .id();
 
-        let rad = 0.4;
-        let shift = 1.0;
+    //shoulder
 
-    let mut entity = ec.id();
+    let rad = 0.4;
+    let dz = 0.0;
 
-    for i in 0..4 {
-        let dz = (i + 1) as f32 * shift;
+    let axis = Vec3::new(1.0, 1.0, 0.0);
 
-        let axis = if i % 2 == 0 {
-            Vec3::new(1.0, 1.0, 0.0)
-        } else {
-            Vec3::new(-1.0, 1.0, 0.0)
-        };
+    let prism = PrismaticJointBuilder::new(axis)
+        .local_anchor2(Vec3::new(0.0, 1.0, 0.0))
+        .limits([-2.0, 2.0]);
+    let joint = ImpulseJoint::new(parent_entity, prism);
 
-        let prism = PrismaticJointBuilder::new(axis)
-            .local_anchor2(Vec3::new(0.0, 0.0, -shift))
-            .limits([-2.0, 2.0]);
-        let joint = ImpulseJoint::new(entity, prism);
+    parent_entity = commands
+        .spawn((
+            TransformBundle::from(Transform::from_xyz(position.x, position.y, position.z + dz)),
+            RigidBody::Dynamic,
+            Collider::cuboid(rad, rad, rad),
+            joint,
+        ))
+        .id();
 
-        entity = commands
-            .spawn((
-                TransformBundle::from(Transform::from_xyz(position.x, position.y, position.z + dz)),
-                RigidBody::Dynamic,
-                Collider::cuboid(rad, rad, rad),
-                joint,
-            ))
-            .id();
-    }
+    //knee
+    let rad = 0.4;
+    let dz = -2.0;
 
+    let axis = Vec3::new(0.0, 1.0, 0.0);
 
-//         .insert((PbrBundle {
-//             mesh: meshes.add(Mesh::from(shape::Icosphere {
-//                 radius: radius,
-//                 subdivisions: 32,
-//             })),
-//             material: materials.add(StandardMaterial {
-//                 base_color: Color::hex("ffd891").unwrap(),
-//                 // vary key PBR parameters on a grid of spheres to show the effect
-//                 // metallic: y01,
-//                 // perceptual_roughness: x01,
-//                 ..default()
-//             }),
-//             transform: Transform::from(Transform::from_translation(position)),
-//             ..default()
-//         }));
+    let prism = PrismaticJointBuilder::new(axis)
+        //.local_axis1(Vec3::new(0.0, 1.0, 0.0))
+        .local_anchor1(Vec3::new(0.0, 0.0, 0.0))
+        .local_anchor2(Vec3::new(1.0, -1.0, 0.0));
+    let joint = ImpulseJoint::new(parent_entity, prism);
+
+    parent_entity = commands
+        .spawn((
+            TransformBundle::from(Transform::from_xyz(position.x, position.y, position.z + dz)),
+            RigidBody::Dynamic,
+            Collider::cuboid(rad, rad, rad),
+            joint,
+        ))
+        .id();
+
+    //foot
+    let rad = 0.4;
+    let dz = -2.0;
+
+    let axis = Vec3::new(1.0, 1.0, 1.0);
+
+    let prism = PrismaticJointBuilder::new(axis)
+        //.local_axis1(Vec3::new(0.0, 1.0, 0.0))
+        .local_anchor1(Vec3::new(1.0, 1.0, 0.0));
+    let joint = ImpulseJoint::new(parent_entity, prism);
+
+    parent_entity = commands
+        .spawn((
+            TransformBundle::from(Transform::from_xyz(position.x, position.y, position.z + dz)),
+            RigidBody::KinematicPositionBased,
+            Collider::cuboid(rad, rad, rad),
+            joint,
+        ))
+        .id();
+
+    // let dz = (2 + 1) as f32 * shift;
+
+    // let axis = if 2 % 2 == 0 {
+    //     Vec3::new(1.0, 1.0, 0.0)
+    // } else {
+    //     Vec3::new(-1.0, 1.0, 0.0)
+    // };
+
+    // let prism = PrismaticJointBuilder::new(axis)
+    //     .local_anchor2(Vec3::new(0.0, 0.0, -shift))
+    //     .limits([-2.0, 2.0]);
+    // let joint = ImpulseJoint::new(entity, prism);
+    // entity = commands
+    //     .spawn((
+    //         TransformBundle::from(Transform::from_xyz(position.x, position.y, position.z + dz)),
+    //         RigidBody::Fixed,
+    //         Collider::cuboid(rad, rad, rad),
+    //         joint,
+    //     ))
+    //     .id();
+
+    //         .insert((PbrBundle {
+    //             mesh: meshes.add(Mesh::from(shape::Icosphere {
+    //                 radius: radius,
+    //                 subdivisions: 32,
+    //             })),
+    //             material: materials.add(StandardMaterial {
+    //                 base_color: Color::hex("ffd891").unwrap(),
+    //                 // vary key PBR parameters on a grid of spheres to show the effect
+    //                 // metallic: y01,
+    //                 // perceptual_roughness: x01,
+    //                 ..default()
+    //             }),
+    //             transform: Transform::from(Transform::from_translation(position)),
+    //             ..default()
+    //         }));
 }
 
 fn spawn_ball(
