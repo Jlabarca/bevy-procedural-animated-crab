@@ -19,7 +19,7 @@ impl Plugin for InputControllerPlugin {
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
 struct Player;
-
+const SPEED: f32 = 0.15;
 fn input_system(
     mut body: Query<(&mut ControllerInput, &GlobalTransform)>,
     input: Res<Input<KeyCode>>,
@@ -33,22 +33,22 @@ fn input_system(
 
     let mut dir = Vec3::ZERO;
     if input.pressed(KeyCode::J) {
-        dir += -tf.right();
+        dir += -tf.right() * SPEED;
     }
     if input.pressed(KeyCode::L) {
-        dir += tf.right();
+        dir += tf.right() * SPEED;
     }
     if input.pressed(KeyCode::K) {
-        dir += -tf.forward();
+        dir += -tf.forward() * SPEED;
     }
     if input.pressed(KeyCode::I) {
-        dir += tf.forward();
+        dir += tf.forward() * SPEED;
     }
     if input.pressed(KeyCode::O) {
-        dir += -tf.up();
+        dir += -tf.up() * SPEED;
     }
     if input.pressed(KeyCode::P) {
-        dir += tf.up();
+        dir += tf.up() * SPEED;
     }
 
     body.movement = dir;
