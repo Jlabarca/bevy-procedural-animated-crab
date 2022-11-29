@@ -1,21 +1,18 @@
-
+/**
+ * Todo: Fix gravity issue, hardcoded to 0 in wanderluster
+ * Prob creando controller settings propio
+ */
 use bevy::prelude::*;
 // use bevy_editor_pls::controls::{Action, Binding, Button, EditorControls, UserInput};
 // use bevy_editor_pls::prelude::*;
-use bevy_mod_wanderlust::{
-    ControllerInput, WanderlustPlugin
-};
-
-
+use bevy_mod_wanderlust::{ControllerInput, WanderlustPlugin};
 
 pub struct InputControllerPlugin;
 
 impl Plugin for InputControllerPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_plugin(WanderlustPlugin)
-        .add_system_to_stage(CoreStage::PreUpdate, input)
-        ;
+        app.add_plugin(WanderlustPlugin)
+            .add_system_to_stage(CoreStage::PreUpdate, input_system);
     }
 }
 
@@ -23,7 +20,7 @@ impl Plugin for InputControllerPlugin {
 #[reflect(Component)]
 struct Player;
 
-fn input(
+fn input_system(
     mut body: Query<(&mut ControllerInput, &GlobalTransform)>,
     input: Res<Input<KeyCode>>,
     // mut mouse: EventReader<MouseMotion>,
@@ -35,22 +32,22 @@ fn input(
     let (mut body, tf) = body.single_mut();
 
     let mut dir = Vec3::ZERO;
-    if input.pressed(KeyCode::A) {
+    if input.pressed(KeyCode::J) {
         dir += -tf.right();
     }
-    if input.pressed(KeyCode::D) {
+    if input.pressed(KeyCode::L) {
         dir += tf.right();
     }
-    if input.pressed(KeyCode::S) {
+    if input.pressed(KeyCode::K) {
         dir += -tf.forward();
     }
-    if input.pressed(KeyCode::W) {
+    if input.pressed(KeyCode::I) {
         dir += tf.forward();
     }
-    if input.pressed(KeyCode::LControl) {
+    if input.pressed(KeyCode::O) {
         dir += -tf.up();
     }
-    if input.pressed(KeyCode::Space) {
+    if input.pressed(KeyCode::P) {
         dir += tf.up();
     }
 
