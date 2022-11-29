@@ -1,6 +1,6 @@
 [package]
 name = "bevy-procedural-animated-spider"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [profile.dev.package."*"]
@@ -18,3 +18,4 @@ bevy_mod_inverse_kinematics = "0.2.0"
 bevy_easings = "0.9.0"
 bevy_mod_wanderlust =  { version = "0.2.3", path = "../bevy_mod_wanderlust" }
 bevy_infinite_grid =  { version = "0.5.2", path = "../bevy_infinite_grid" }
+interpolation = "0.2.0"
