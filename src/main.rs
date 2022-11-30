@@ -31,14 +31,13 @@ fn main() {
         .add_plugin(EasingsPlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .add_startup_system(setup)
-        .add_system(on_added_setup_ik)
-        .add_system(target_system)
-        //.add_system(anchor_system)
-        // .add_system(pole_system)
-        .add_event::<MoveAnchorEvent>()
-        .add_system(anchor_move_event_trigger_system)
-        .add_system(anchor_move_event_system)
-        //.add_system(anchor_relocation_system)
+        // .add_system(on_added_setup_ik)
+        // .add_system(target_system)
+        // // .add_system(anchor_system)
+        // // .add_system(pole_system)
+        // .add_event::<MoveAnchorEvent>()
+        // .add_system(anchor_move_event_trigger_system)
+        // .add_system(anchor_move_event_system)
         .run();
 }
 
@@ -83,7 +82,7 @@ fn setup(
             },
             ..default()
         },
-        transform: Transform::from_xyz(-8.0, 8.0, 8.0).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(-12.0, 8.0, 12.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 
@@ -109,14 +108,14 @@ fn setup(
     //model
     commands
         .spawn(SceneBundle {
-            scene: assets.load("skin.gltf#Scene0"),
+            scene: assets.load("crab2/scene.gltf#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         })
         .insert((
             Player {},
             CharacterControllerBundle {
-                transform: Transform::from_xyz(0.0, 0.0, 0.0),
+                transform: Transform::from_xyz(0.0, 1.0, 0.0),
                 physics: ControllerPhysicsBundle {
                     rigidbody: RigidBody::Dynamic,
                     locked_axes: LockedAxes::ROTATION_LOCKED,

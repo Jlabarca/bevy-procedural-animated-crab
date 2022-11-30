@@ -47,7 +47,7 @@ impl Default for FootAnchor {
             animation_duration: Duration::from_secs_f32(0.36),
             animation_timer: Timer::new(Duration::from_secs_f32(0.36), TimerMode::Once),
             pos_error_margin: 0.06,
-            max_distance: 0.77,
+            max_distance: 0.37,
             moving: false,
         }
     }

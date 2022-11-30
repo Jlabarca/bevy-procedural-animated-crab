@@ -78,7 +78,7 @@ pub fn anchor_move_event_system(
                 .entity(event.anchor)
                 .insert(anchor_transform.ease_to(
                     Transform::from_translation(anchor.desired_pos.clone()),
-                    bevy_easings::EaseFunction::CubicIn,
+                    bevy_easings::EaseFunction::CircularInOut,
                     EasingType::Once {
                         duration: anchor.animation_duration,
                     },
@@ -121,7 +121,7 @@ pub fn target_system(mut foot_targets: Query<(&FootTarget, &mut Transform), With
         //let pos = player_query.get(foot_target.owner).unwrap().1.translation;
         target_transform.translation.x = foot_target.pos_offset.x;
         target_transform.translation.z = foot_target.pos_offset.z;
-        target_transform.translation.y = 0.5;
+        //target_transform.translation.y = 1.0;
     }
 
     //Calculate height using raycast
@@ -190,25 +190,101 @@ pub fn on_added_setup_ik(
     // Use the presence of `AnimationPlayer` to determine the root entity of the skeleton.
     for (entity, _parent) in added_query.iter() {
         // Try to get the entity for the right hand joint.
-        info!("setup_ik_on_added");
+
+        info!("setup_ik_on_added: {}", names.get(entity).unwrap());
 
         let right_hand = find_entity(
             &EntityPath {
                 parts: vec![
-                    "Pelvis".into(),
-                    "Spine1".into(),
-                    "Spine2".into(),
-                    "Collar.R".into(),
-                    "UpperArm.R".into(),
-                    "ForeArm.R".into(),
-                    "Hand.R".into(),
+                    // "Sketchfab_model".into(),
+                    "root".into(),
+                    "GLTF_SceneRootNode".into(),
+                    "Armature_59".into(),
+                    "GLTF_created_0".into(),
+                    "GLTF_created_0_rootJoint".into(),
+                    "Bone.048_57".into(),
+                    "Bone.105_56".into(),
+                    "Bone.121_55".into(),
+                    "Bone.137_54".into(),
+                    "Bone.153_53".into(),
                 ],
             },
+            // &EntityPath {
+            //     parts: vec![
+            //         // "Sketchfab_model".into(),
+            //         "root".into(),
+            //         "GLTF_SceneRootNode".into(),
+            //         "Armature_59".into(),
+            //         "GLTF_created_0".into(),
+            //         "GLTF_created_0_rootJoint".into(),
+            //         "Bone.048_57".into(),
+            //         "Bone.105_56".into(),
+            //         "Bone.121_55".into(),
+            //         "Bone.137_54".into(),
+            //         "Bone.153_53".into(),
+            //     ],
+            // },
             entity,
             &children,
             &names,
         )
         .unwrap();
+
+        // let left_hand = find_entity(
+        //     &EntityPath {
+        //         parts: vec![
+        //             "Sketchfab_model".into(),
+        //             "root".into(),
+        //             "GLTF_SceneRootNode".into(),
+        //             "Armature_59".into(),
+        //             "GLTF_created_0".into(),
+        //             "Bone.105_56".into(),
+        //             "Bone.121_55".into(),
+        //             "Bone.121_55".into(),
+        //         ],
+        //     },
+        //     entity,
+        //     &children,
+        //     &names,
+        // )
+        // .unwrap();
+
+        // let right_foot = find_entity(
+        //     &EntityPath {
+        //         parts: vec![
+        //             "Pelvis".into(),
+        //             "Spine1".into(),
+        //             "Spine2".into(),
+        //             "Collar.R".into(),
+        //             "UpperArm.R".into(),
+        //             "ForeArm.R".into(),
+        //             "Hand.R".into(),
+        //         ],
+        //     },
+        //     entity,
+        //     &children,
+        //     &names,
+        // )
+        // .unwrap();
+
+
+        // let left_foot = find_entity(
+        //     &EntityPath {
+        //         parts: vec![
+        //             "Pelvis".into(),
+        //             "Spine1".into(),
+        //             "Spine2".into(),
+        //             "Collar.R".into(),
+        //             "UpperArm.R".into(),
+        //             "ForeArm.R".into(),
+        //             "Hand.R".into(),
+        //         ],
+        //     },
+        //     entity,
+        //     &children,
+        //     &names,
+        // )
+        // .unwrap();
 
         generate_leg_kinematics(
             player_entity,
@@ -216,8 +292,35 @@ pub fn on_added_setup_ik(
             &mut commands,
             &mut meshes,
             &mut materials,
-            1.0,
+            Vec3::new(-9.0, 0.2, 3.5),
         );
+
+        // generate_leg_kinematics(
+        //     player_entity,
+        //     left_hand,
+        //     &mut commands,
+        //     &mut meshes,
+        //     &mut materials,
+        //     Vec3::new(-2.0, 1.2, 1.0),
+        // );
+
+        // generate_leg_kinematics(
+        //     player_entity,
+        //     right_hand,
+        //     &mut commands,
+        //     &mut meshes,
+        //     &mut materials,
+        //     -1.0,
+        // );
+
+        // generate_leg_kinematics(
+        //     player_entity,
+        //     right_hand,
+        //     &mut commands,
+        //     &mut meshes,
+        //     &mut materials,
+        //     -0.5,
+        // );
     }
 }
 
@@ -227,14 +330,14 @@ fn generate_leg_kinematics(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    side_ratio: f32,
+    offset_spread: Vec3,
 ) {
     commands.entity(foot_entity).insert(Foot {});
 
     let pole = commands
         .spawn((
             PbrBundle {
-                transform: Transform::from_xyz(-1.0 * side_ratio, 0.4, -0.2),
+                transform: Transform::from_translation(offset_spread),
                 mesh: meshes.add(Mesh::from(shape::Icosphere {
                     radius: 0.05,
                     subdivisions: 1,
@@ -247,7 +350,7 @@ fn generate_leg_kinematics(
             },
             FootPole {
                 owner: player_entity,
-                pos_offset: Vec3::new(-1.0 * side_ratio, 1.0, 1.0),
+                pos_offset: Vec3::new(-1.0, 1.0, 0.25) * offset_spread,
             },
         ))
         .id();
@@ -255,7 +358,7 @@ fn generate_leg_kinematics(
     let anchor = commands
         .spawn((
             PbrBundle {
-                transform: Transform::from_xyz(-0.5 * side_ratio, 0.4, -0.2),
+                transform: Transform::from_translation(Vec3::new(-0.25, 0.77, 0.0) * offset_spread),
                 mesh: meshes.add(Mesh::from(shape::Icosphere {
                     radius: 0.05,
                     subdivisions: 1,
@@ -276,7 +379,7 @@ fn generate_leg_kinematics(
     let target = commands
         .spawn((
             PbrBundle {
-                transform: Transform::from_xyz(-0.5 * side_ratio, 0.4, -0.2),
+                transform: Transform::from_translation(Vec3::new(-0.25, 0.77, 0.0) * offset_spread),
                 mesh: meshes.add(Mesh::from(shape::Icosphere {
                     radius: 0.05,
                     subdivisions: 1,
@@ -291,14 +394,14 @@ fn generate_leg_kinematics(
                 owner: player_entity,
                 foot: foot_entity,
                 anchor: anchor,
-                pos_offset: Vec3::new(-0.5 * side_ratio, 0.0, 0.0),
+                pos_offset: Vec3::new(-0.25, 0.77, 0.0) * offset_spread,
             },
         ))
         .id();
 
     commands.entity(foot_entity).insert(IkConstraint {
-        chain_length: 2,
-        iterations: 20,
+        chain_length: 3,
+        iterations: 30,
         target: anchor,
         pole_target: None,
         pole_angle: -std::f32::consts::FRAC_PI_2,
