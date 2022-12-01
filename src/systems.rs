@@ -181,32 +181,21 @@ pub fn on_added_setup_ik(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    added_query: Query<(Entity, &Parent), Added<AnimationPlayer>>,
+    added_player_query: Query<Entity, Added<Player>>,
     children: Query<&Children>,
     names: Query<&Name>,
-    player_query: Query<(Entity, &Player)>,
 ) {
-    let player_entity = player_query.get_single().unwrap().0;
-    // Use the presence of `AnimationPlayer` to determine the root entity of the skeleton.
-    for (entity, _parent) in added_query.iter() {
-        // Try to get the entity for the right hand joint.
-
-        info!("setup_ik_on_added: {}", names.get(entity).unwrap());
-
+    for player_entity in added_player_query.iter() {
+        //info!("setup_ik_on_added: {}", names.get(player_entity).unwrap()); //wtf silent error todo: check wtf
         let right_hand = find_entity(
             &EntityPath {
                 parts: vec![
-                    // "Sketchfab_model".into(),
-                    "root".into(),
-                    "GLTF_SceneRootNode".into(),
-                    "Armature_59".into(),
-                    "GLTF_created_0".into(),
-                    "GLTF_created_0_rootJoint".into(),
-                    "Bone.048_57".into(),
-                    "Bone.105_56".into(),
-                    "Bone.121_55".into(),
-                    "Bone.137_54".into(),
-                    "Bone.153_53".into(),
+                     // "Sketchfab_model".into(),
+                    "1setup".into(),
+                    "Armature".into(),
+                    "Columna".into(),
+                    "R.Shoulder".into(),
+                    "R.Leg1".into()
                 ],
             },
             // &EntityPath {
@@ -224,7 +213,7 @@ pub fn on_added_setup_ik(
             //         "Bone.153_53".into(),
             //     ],
             // },
-            entity,
+            player_entity,
             &children,
             &names,
         )
@@ -426,6 +415,10 @@ fn find_entity(
         let mut found = false;
         if let Ok(children) = children.get(current_entity) {
             for child in children.iter() {
+                if part.starts_with("1") {
+                    current_entity = *child;
+                    break;
+                }
                 if let Ok(name) = names.get(*child) {
                     if name == part {
                         // Found a children with the right name, continue to the next part
@@ -437,7 +430,7 @@ fn find_entity(
             }
         }
         if !found {
-            warn!("Entity not found for path {:?} on part {:?}", path, part);
+            warn!("Entity not found for path {:?} on part {:?}", path, part); // not happening
             return Err(());
         }
     }

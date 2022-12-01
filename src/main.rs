@@ -31,13 +31,13 @@ fn main() {
         .add_plugin(EasingsPlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .add_startup_system(setup)
-        // .add_system(on_added_setup_ik)
-        // .add_system(target_system)
-        // // .add_system(anchor_system)
-        // // .add_system(pole_system)
-        // .add_event::<MoveAnchorEvent>()
-        // .add_system(anchor_move_event_trigger_system)
-        // .add_system(anchor_move_event_system)
+        .add_system(on_added_setup_ik)
+        .add_system(target_system)
+        // .add_system(anchor_system)
+        // .add_system(pole_system)
+        .add_event::<MoveAnchorEvent>()
+        .add_system(anchor_move_event_trigger_system)
+        .add_system(anchor_move_event_system)
         .run();
 }
 
@@ -108,7 +108,7 @@ fn setup(
     //model
     commands
         .spawn(SceneBundle {
-            scene: assets.load("crab2/scene.gltf#Scene0"),
+            scene: assets.load("crab4/crab2.gltf#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         })
