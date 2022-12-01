@@ -1,9 +1,11 @@
 mod components;
 mod input_controller;
 mod systems;
+mod ik_systems;
 
 use components::{MoveAnchorEvent, Player};
 use systems::*;
+use ik_systems::*;
 
 use bevy::{math::vec3, prelude::*};
 use bevy_easings::*;
@@ -15,6 +17,7 @@ use bevy_mod_wanderlust::{CharacterControllerBundle, ControllerPhysicsBundle};
 use bevy_obj::*;
 use bevy_rapier3d::prelude::*;
 use input_controller::InputControllerPlugin;
+
 
 fn main() {
     info!("main");
@@ -108,7 +111,7 @@ fn setup(
     //model
     commands
         .spawn(SceneBundle {
-            scene: assets.load("crab4/crab2.gltf#Scene0"),
+            scene: assets.load("crab4/crab4.gltf#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         })
