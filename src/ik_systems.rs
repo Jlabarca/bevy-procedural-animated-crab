@@ -15,17 +15,15 @@ pub fn on_added_setup_ik(
     let player_entity = player_query.get_single().unwrap().0;
     for added_entity in added_player_query.iter() {
         info!("setup_ik_on_added: {}", names.get(added_entity).unwrap()); //wtf silent error todo: check wtf
+
+
         let right_hand = find_entity(
             &EntityPath {
                 parts: vec![
-                    // "Sketchfab_model".into(),
-                    //"|1|".into(),  //pass through  a nameless entity
-                    // "Armature".into(),
-                    "Spine".into(),
-                    "L.Shoulder.1".into(),
-                    "L.Leg.1".into(),
-                    "L.Foot.1".into(),
-                    "L.Toe.1".into(),
+                    "L.Shoulder.001".into(),
+                    "L.Leg.001".into(),
+                    "L.Foot.001".into(),
+                    "L.Toe.001".into(),
                 ],
             },
             added_entity,
@@ -40,7 +38,139 @@ pub fn on_added_setup_ik(
             &mut commands,
             &mut meshes,
             &mut materials,
-            Vec3::new(1.5, 0.4, 1.2),
+            Vec3::new(1.1, 0.6, 0.5),
+            3,
+            30
+        );
+
+        let right_hand2 = find_entity(
+            &EntityPath {
+                parts: vec![
+                    "L.Shoulder.002".into(),
+                    "L.Leg.002".into(),
+                    "L.Foot.002".into(),
+                    "L.Toe.002".into(),
+                ],
+            },
+            added_entity,
+            &children,
+            &names,
+        )
+        .unwrap();
+
+        generate_leg_kinematics(
+            player_entity,
+            right_hand2,
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            Vec3::new(1.1, 0.6, 0.0),
+            2,
+            20
+        );
+
+        let right_hand3 = find_entity(
+            &EntityPath {
+                parts: vec![
+                    "L.Shoulder.003".into(),
+                    "L.Leg.003".into(),
+                    "L.Foot.003".into(),
+                    "L.Toe.003".into(),
+                ],
+            },
+            added_entity,
+            &children,
+            &names,
+        )
+        .unwrap();
+
+        generate_leg_kinematics(
+            player_entity,
+            right_hand3,
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            Vec3::new(1.1, 0.6, -0.5),
+            2,
+            20
+        );
+
+        let right_handR = find_entity(
+            &EntityPath {
+                parts: vec![
+                    "R.Shoulder.001".into(),
+                    "R.Leg.001".into(),
+                    "R.Foot.001".into(),
+                    "R.Toe.001".into(),
+                ],
+            },
+            added_entity,
+            &children,
+            &names,
+        )
+        .unwrap();
+
+        generate_leg_kinematics(
+            player_entity,
+            right_handR,
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            Vec3::new(-1.1, 0.6, 0.5),
+            3,
+            30
+        );
+
+        let right_hand2R = find_entity(
+            &EntityPath {
+                parts: vec![
+                    "R.Shoulder.002".into(),
+                    "R.Leg.002".into(),
+                    "R.Foot.002".into(),
+                    "R.Toe.002".into(),
+                ],
+            },
+            added_entity,
+            &children,
+            &names,
+        )
+        .unwrap();
+
+        generate_leg_kinematics(
+            player_entity,
+            right_hand2R,
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            Vec3::new(-1.1, 0.6, 0.0),
+            2,
+            20
+        );
+
+        let right_hand3R = find_entity(
+            &EntityPath {
+                parts: vec![
+                    "R.Shoulder.003".into(),
+                    "R.Leg.003".into(),
+                    "R.Foot.003".into(),
+                    "R.Toe.003".into(),
+                ],
+            },
+            added_entity,
+            &children,
+            &names,
+        )
+        .unwrap();
+
+        generate_leg_kinematics(
+            player_entity,
+            right_hand3R,
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            Vec3::new(-1.1, 0.6, -0.5),
+            2,
+            20
         );
     }
 }
@@ -52,13 +182,15 @@ fn generate_leg_kinematics(
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
     offset_spread: Vec3,
+    chain_length: usize,
+    iterations: usize,
 ) {
     commands.entity(foot_entity).insert(Foot {});
 
     let pole = commands
         .spawn((
             PbrBundle {
-                transform: Transform::from_translation(offset_spread),
+                transform: Transform::from_translation(offset_spread + Vec3::new(1.0, 1.0, 1.0)) ,
                 mesh: meshes.add(Mesh::from(shape::Icosphere {
                     radius: 0.05,
                     subdivisions: 1,
@@ -121,8 +253,8 @@ fn generate_leg_kinematics(
         .id();
 
     commands.entity(foot_entity).insert(IkConstraint {
-        chain_length: 3,
-        iterations: 30,
+        chain_length,
+        iterations,
         target: anchor,
         pole_target: Some(pole),
         pole_angle: -std::f32::consts::FRAC_PI_2,

@@ -44,10 +44,10 @@ impl Default for FootAnchor {
             foot: None,
             current_pos: Vec3::ZERO,
             desired_pos: Vec3::ZERO,
-            animation_duration: Duration::from_secs_f32(0.36),
-            animation_timer: Timer::new(Duration::from_secs_f32(0.36), TimerMode::Once),
-            pos_error_margin: 0.06,
-            max_distance: 0.37,
+            animation_duration: Duration::from_secs_f32(0.25),
+            animation_timer: Timer::new(Duration::from_secs_f32(0.27), TimerMode::Once),
+            pos_error_margin: 0.26,
+            max_distance: 0.25,
             moving: false,
         }
     }

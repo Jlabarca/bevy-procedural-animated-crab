@@ -111,7 +111,7 @@ fn setup(
     //model
     commands
         .spawn(SceneBundle {
-            scene: assets.load("crab4/crab4.gltf#Scene0"),
+            scene: assets.load("crab/crab_final.gltf#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         })
