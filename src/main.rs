@@ -1,14 +1,13 @@
 mod components;
+mod ik_systems;
 mod input_controller;
 mod systems;
-mod ik_systems;
 
 use components::{MoveAnchorEvent, Player};
-use systems::*;
 use ik_systems::*;
+use systems::*;
 
 use bevy::{math::vec3, prelude::*};
-use bevy_easings::*;
 use bevy_flycam::PlayerPlugin;
 use bevy_infinite_grid::{InfiniteGrid, InfiniteGridBundle, InfiniteGridPlugin};
 use bevy_inspector_egui::WorldInspectorPlugin;
@@ -16,8 +15,8 @@ use bevy_mod_inverse_kinematics::InverseKinematicsPlugin;
 use bevy_mod_wanderlust::{CharacterControllerBundle, ControllerPhysicsBundle};
 use bevy_obj::*;
 use bevy_rapier3d::prelude::*;
+use bevy_tweening::{lens::*, *};
 use input_controller::InputControllerPlugin;
-
 
 fn main() {
     info!("main");
@@ -31,7 +30,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(InverseKinematicsPlugin)
-        .add_plugin(EasingsPlugin)
+        .add_plugin(TweeningPlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .add_startup_system(setup)
         .add_system(on_added_setup_ik)

@@ -1,18 +1,17 @@
 use crate::components::{Foot, FootAnchor, FootPole, FootTarget, MoveAnchorEvent, Player};
-use bevy::prelude::*;
-use bevy_easings::*;
+use bevy::{prelude::*, math::Vec3Swizzles};
+use bevy_tweening::{lens::*, *};
 
 // keeping foot on anchor
 pub fn anchor_system(
     mut anchor_query: Query<(&FootAnchor, &mut Transform), Without<Foot>>,
     mut foot_query: Query<&mut Transform, (With<Foot>, Without<FootAnchor>)>,
+    mut target_query: Query<&FootTarget>,
 ) {
     for (anchor, mut anchor_transform) in anchor_query.iter_mut() {
         if let Ok(mut foot_transform) = foot_query.get_mut(anchor.foot.unwrap()) {
             if !anchor.moving {
-                //foot_transform.translation = anchor_transform.translation.clone();
-                //info!("anchor_system {:?}", foot_transform.translation);
-                foot_transform.translation = anchor_transform.translation.clone();
+                foot_transform.translation = anchor_transform.translation;
             }
         }
     }
@@ -21,18 +20,20 @@ pub fn anchor_system(
 // trigger event
 pub fn anchor_move_event_trigger_system(
     time: Res<Time>,
-    foot_targets: Query<(&FootTarget, &GlobalTransform), Without<FootAnchor>>,
+    foot_targets: Query<(Entity, &FootTarget, &GlobalTransform), Without<FootAnchor>>,
     mut anchor_query: Query<
-        (&mut FootAnchor, &GlobalTransform),
+        (Entity, &mut FootAnchor, &GlobalTransform),
         (With<FootAnchor>, Without<FootTarget>),
     >,
     mut move_event_writer: EventWriter<MoveAnchorEvent>,
 ) {
-    for (foot_target, target_transform) in foot_targets.iter() {
-        if let Ok((mut anchor, anchor_transform)) = anchor_query.get_mut(foot_target.anchor) {
+    for (target_entity, foot_target, target_transform) in foot_targets.iter() {
+        if let Ok((anchor_entity, mut anchor, anchor_transform)) =
+            anchor_query.get_mut(foot_target.anchor)
+        {
             let distance = anchor_transform
-                .translation_vec3a()
-                .distance(target_transform.translation_vec3a());
+                .translation().xz()
+                .distance(target_transform.translation().xz()); //only xz distance
             // tick the timer
             anchor.animation_timer.tick(time.delta());
 
@@ -45,15 +46,13 @@ pub fn anchor_move_event_trigger_system(
             }
 
             if distance > anchor.max_distance {
-                anchor.desired_pos = target_transform.translation();
                 move_event_writer.send(MoveAnchorEvent {
                     anchor: foot_target.anchor,
-                    target: anchor.desired_pos,
+                    target: target_entity,
                 });
                 anchor.moving = true;
-
-                info!("Triggering foot {:?}", anchor.max_distance);
-                info!("foot.desired_pos: {:?}", anchor.desired_pos);
+                // info!("Triggering foot {:?}", anchor.max_distance);
+                // info!("foot.desired_pos: {:?}", target_transform.translation());
             }
         }
     }
@@ -63,27 +62,63 @@ pub fn anchor_move_event_trigger_system(
 pub fn anchor_move_event_system(
     mut commands: Commands,
     mut reader: EventReader<MoveAnchorEvent>,
-    mut anchor_query: Query<(&mut FootAnchor, &Transform)>,
+    mut anchor_query: Query<(&mut FootAnchor, &mut Transform), Without<FootTarget>>,
+    mut target_query: Query<(&GlobalTransform, With<FootTarget>)>,
 ) {
     for event in reader.iter() {
-        info!("anchor_move_event_system entity {:?}", event.anchor);
+        if let Ok((mut anchor, mut anchor_transform)) = anchor_query.get_mut(event.anchor) {
+            if let Ok(target_transform) = target_query.get_mut(event.target) {
 
-        if let Ok((mut anchor, anchor_transform)) = anchor_query.get_mut(event.anchor) {
-            info!("ease_to foot {:?}", anchor_transform);
-            info!("event.target {:?}", event.target);
-            commands
-                .entity(event.anchor)
-                .insert(anchor_transform.ease_to(
-                    Transform::from_translation(anchor.desired_pos.clone()),
-                    bevy_easings::EaseFunction::CircularInOut,
-                    EasingType::Once {
-                        duration: anchor.animation_duration,
+                let mut target_position = target_transform.0.translation().clone();
+                 let ahead = target_position - anchor_transform.translation;
+                if anchor.inverted {
+                    target_position += Vec3::new(0.0, 0.6, 0.0);
+                }
+
+                target_position += ahead/2.0;
+                anchor.inverted = !anchor.inverted;
+
+                let tween = Tween::new(
+                    EaseFunction::BounceInOut,
+                    anchor.animation_duration,
+                    TransformPositionLens2 {
+                        start: anchor_transform.translation,
+                        end: target_position,
                     },
-                ));
+                )
+                .with_repeat_count(RepeatCount::Finite(1))
+                .with_repeat_strategy(RepeatStrategy::MirroredRepeat);
+                info!("Tweening foot {:?}", ahead);
 
-            anchor.animation_timer.reset();
-            info!("event.target: {:?}", event.target);
+                // commands
+                //     .entity(event.anchor)
+                //     .insert(anchor_transform.ease_to(
+                //         Transform::from_translation(target_position),
+                //         bevy_easings::EaseFunction::BounceInOut,
+                //         EasingType::Once {
+                //             duration: anchor.animation_duration,
+                //         },
+                //     ));
+
+                commands.entity(event.anchor).insert(Animator::new(tween));
+                anchor.animation_timer.reset();
+            }
         }
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct TransformPositionLens2 {
+    /// Start value of the translation.
+    pub start: Vec3,
+    /// End value of the translation.
+    pub end: Vec3,
+}
+
+impl Lens<Transform> for TransformPositionLens2 {
+    fn lerp(&mut self, target: &mut Transform, ratio: f32) {
+        let value = self.start + (self.end - self.start) * ratio;
+        target.translation = value;
     }
 }
 
@@ -126,5 +161,4 @@ pub fn pole_system(
         let player_pos = player_query.get(foot_pole.owner).unwrap().1.translation;
         target_transform.translation = player_pos + foot_pole.pos_offset;
     }
-
 }

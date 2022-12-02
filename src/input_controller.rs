@@ -19,7 +19,7 @@ impl Plugin for InputControllerPlugin {
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
 struct Player;
-const SPEED: f32 = 0.25;
+const SPEED: f32 = 0.35;
 fn input_system(
     mut body: Query<(&mut ControllerInput, &GlobalTransform)>,
     input: Res<Input<KeyCode>>,

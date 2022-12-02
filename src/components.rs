@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::{
-    prelude::{Component, Entity, Vec3},
+    prelude::{Component, Entity, Transform, Vec3},
     reflect::Reflect,
     time::{Timer, TimerMode},
 };
@@ -29,26 +29,26 @@ pub struct FootPole {
 #[derive(Component)]
 pub struct FootAnchor {
     pub foot: Option<Entity>,
-    pub current_pos: Vec3,
-    pub desired_pos: Vec3,
+    pub target: Option<Entity>,
     pub animation_duration: Duration,
     pub animation_timer: Timer,
     pub pos_error_margin: f32,
     pub max_distance: f32,
     pub moving: bool,
+    pub inverted: bool,
 }
 
 impl Default for FootAnchor {
     fn default() -> Self {
         Self {
             foot: None,
-            current_pos: Vec3::ZERO,
-            desired_pos: Vec3::ZERO,
+            target: None,
             animation_duration: Duration::from_secs_f32(0.25),
-            animation_timer: Timer::new(Duration::from_secs_f32(0.27), TimerMode::Once),
-            pos_error_margin: 0.26,
+            animation_timer: Timer::new(Duration::from_secs_f32(0.25), TimerMode::Once),
+            pos_error_margin: 0.16,
             max_distance: 0.25,
             moving: false,
+            inverted: false,
         }
     }
 }
@@ -56,5 +56,5 @@ impl Default for FootAnchor {
 //Events
 pub struct MoveAnchorEvent {
     pub anchor: Entity,
-    pub target: Vec3,
+    pub target: Entity,
 }
