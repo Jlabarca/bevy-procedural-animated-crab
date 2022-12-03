@@ -16,6 +16,6 @@ bevy_flycam = { git = "https://github.com/sburris0/bevy_flycam" }
 bevy_obj ="0.9.1"
 bevy_mod_inverse_kinematics = "0.2.0"
 bevy_tweening = "0.6"
-bevy_mod_wanderlust =  { version = "0.2.3", path = "../bevy_mod_wanderlust" }
 bevy_infinite_grid =  { version = "0.5.2", path = "../bevy_infinite_grid" }
 interpolation = "0.2.0"
+rand = "0.8.4"

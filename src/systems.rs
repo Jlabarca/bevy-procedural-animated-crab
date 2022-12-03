@@ -1,5 +1,6 @@
 use crate::components::{Foot, FootAnchor, FootPole, FootTarget, MoveAnchorEvent, Player};
-use bevy::{prelude::*, math::Vec3Swizzles};
+use bevy::{math::Vec3Swizzles, prelude::*};
+use bevy_rapier3d::prelude::{QueryFilter, RapierContext};
 use bevy_tweening::{lens::*, *};
 
 // keeping foot on anchor
@@ -32,9 +33,10 @@ pub fn anchor_move_event_trigger_system(
             anchor_query.get_mut(foot_target.anchor)
         {
             let distance = anchor_transform
-                .translation().xz()
+                .translation()
+                .xz()
                 .distance(target_transform.translation().xz()); //only xz distance
-            // tick the timer
+                                                                // tick the timer
             anchor.animation_timer.tick(time.delta());
 
             if anchor.animation_timer.finished() {
@@ -68,14 +70,13 @@ pub fn anchor_move_event_system(
     for event in reader.iter() {
         if let Ok((mut anchor, mut anchor_transform)) = anchor_query.get_mut(event.anchor) {
             if let Ok(target_transform) = target_query.get_mut(event.target) {
-
                 let mut target_position = target_transform.0.translation().clone();
-                 let ahead = target_position - anchor_transform.translation;
+                let ahead = target_position - anchor_transform.translation;
                 if anchor.inverted {
                     target_position += Vec3::new(0.0, 0.6, 0.0);
                 }
 
-                target_position += ahead/2.0;
+                target_position += ahead / 2.0;
                 anchor.inverted = !anchor.inverted;
 
                 let tween = Tween::new(
@@ -88,8 +89,6 @@ pub fn anchor_move_event_system(
                 )
                 .with_repeat_count(RepeatCount::Finite(1))
                 .with_repeat_strategy(RepeatStrategy::MirroredRepeat);
-                info!("Tweening foot {:?}", ahead);
-
                 // commands
                 //     .entity(event.anchor)
                 //     .insert(anchor_transform.ease_to(
@@ -123,34 +122,53 @@ impl Lens<Transform> for TransformPositionLens2 {
 }
 
 // foot target at body side
-pub fn target_system(mut foot_targets: Query<(&FootTarget, &mut Transform), Without<Player>>) {
-    for (foot_target, mut target_transform) in foot_targets.iter_mut() {
+pub fn target_system(
+    mut foot_targets: Query<(&FootTarget, &mut GlobalTransform, &mut Transform), Without<Player>>,
+    rapier_context: Res<RapierContext>,
+) {
+    for (foot_target, mut target_global_transform, mut target_transform) in foot_targets.iter_mut()
+    {
         //let pos = player_query.get(foot_target.owner).unwrap().1.translation;
         target_transform.translation.x = foot_target.pos_offset.x;
         target_transform.translation.z = foot_target.pos_offset.z;
         //target_transform.translation.y = 1.0;
-    }
 
-    //Calculate height using raycast
-    // for (foot_target, mut transform) in foot_targets.iter_mut() {
-    //     let pos = target_query.get(foot_target.owner).unwrap().1.translation;
-    //     let mut ray = Ray::new(
-    //         Vec3::new(pos.x, pos.y + 10.0, pos.z),
-    //         Vec3::new(0.0, -1.0, 0.0),
-    //     );
-    //     let mut hit = false;
-    //     let mut hit_pos = Vec3::new(0.0, 0.0, 0.0);
-    //     for result in foot_target.owner.world().raycast(ray) {
-    //         if result.entity != foot_target.owner {
-    //             hit = true;
-    //             hit_pos = result.position;
-    //             break;
-    //         }
-    //     }
-    //     if hit {
-    //         transform.translation.y = hit_pos.y + 0.1;
-    //     }
-    // }
+        //Calculate height using raycast
+        let ray_pos = target_global_transform.translation();
+        let ray_dir = Vec3::new(0.0, -1.0, 0.0);
+        let max_toi = 1.0;
+        let solid = true;
+        let filter = QueryFilter::default().exclude_collider(foot_target.owner);
+
+        if let Some((entity, toi)) =
+            rapier_context.cast_ray(ray_pos, ray_dir, max_toi, solid, filter)
+        {
+            // The first collider hit has the entity `entity` and it hit after
+            // the ray travelled a distance equal to `ray_dir * toi`.
+            let hit_point = ray_pos + ray_dir * toi;
+            // println!("Entity {:?} hit at point {}", entity, hit_point);
+            target_transform.translation.y = hit_point.y + 0.1;
+        }
+        // for (foot_target, mut transform) in foot_targets.iter_mut() {
+        //     let pos = target_query.get(foot_target.owner).unwrap().1.translation;
+        //     let mut ray = Ray::new(
+        //         Vec3::new(pos.x, pos.y + 10.0, pos.z),
+        //         Vec3::new(0.0, -1.0, 0.0),
+        //     );
+        //     let mut hit = false;
+        //     let mut hit_pos = Vec3::new(0.0, 0.0, 0.0);
+        //     for result in foot_target.owner.world().raycast(ray) {
+        //         if result.entity != foot_target.owner {
+        //             hit = true;
+        //             hit_pos = result.position;
+        //             break;
+        //         }
+        //     }
+        //     if hit {
+        //         transform.translation.y = hit_pos.y + 0.1;
+        //     }
+        // }
+    }
 }
 
 pub fn pole_system(
