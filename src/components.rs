@@ -7,7 +7,15 @@ use bevy::{
 };
 
 #[derive(Component, Default, Reflect)]
-pub struct Player {}
+pub struct Player {
+    pub move_speed: f32,
+    pub rotate_speed: f32,
+    pub grounded: bool,
+    pub jumping: bool,
+    pub jump_power: f32,
+    pub jump_time: f32,
+    pub jump_time_max: f32,
+}
 
 #[derive(Component)]
 pub struct Foot {}

@@ -35,7 +35,7 @@ pub fn on_added_setup_ik(
             &mut commands,
             &mut meshes,
             &mut materials,
-            Vec3::new( 0.8, 0.3, 0.5),
+            Vec3::new(0.8, 0.3, 0.5),
             3,
             20,
             0.20,
@@ -56,11 +56,12 @@ pub fn on_added_setup_ik(
                 added_entity,
                 &children,
                 &names,
-            ).unwrap(),
+            )
+            .unwrap(),
             &mut commands,
             &mut meshes,
             &mut materials,
-            Vec3::new( 0.8, 0.3, 0.0),
+            Vec3::new(0.8, 0.3, 0.0),
             3,
             20,
             0.25,
@@ -86,14 +87,12 @@ pub fn on_added_setup_ik(
             &mut commands,
             &mut meshes,
             &mut materials,
-            Vec3::new( 0.8, 0.3, -0.5),
+            Vec3::new(0.8, 0.3, -0.5),
             3,
             20,
             0.20,
             false,
         );
-
-
 
         generate_leg_kinematics(
             player_entity,
@@ -114,13 +113,12 @@ pub fn on_added_setup_ik(
             &mut commands,
             &mut meshes,
             &mut materials,
-            Vec3::new(- 0.8, 0.3, 0.5),
+            Vec3::new(-0.8, 0.3, 0.5),
             3,
             30,
             0.25,
             true,
         );
-
 
         generate_leg_kinematics(
             player_entity,
@@ -141,7 +139,7 @@ pub fn on_added_setup_ik(
             &mut commands,
             &mut meshes,
             &mut materials,
-            Vec3::new(- 0.8, 0.3, 0.0),
+            Vec3::new(-0.8, 0.3, 0.0),
             3,
             20,
             0.20,
@@ -167,7 +165,7 @@ pub fn on_added_setup_ik(
             &mut commands,
             &mut meshes,
             &mut materials,
-            Vec3::new(- 0.8, 0.3, -0.5),
+            Vec3::new(-0.8, 0.3, -0.5),
             3,
             20,
             0.25,
