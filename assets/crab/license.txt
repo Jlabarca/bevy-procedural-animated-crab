@@ -1,0 +1,11 @@
+Model Information:
+* title:	Dancing Crab - Uca Mjoebergi
+* source:	https://sketchfab.com/3d-models/dancing-crab-uca-mjoebergi-280863886fee409ab3c8168f07caa89f
+* author:	Bohdan Lvov (https://sketchfab.com/ostapblendercg)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Dancing Crab - Uca Mjoebergi" (https://sketchfab.com/3d-models/dancing-crab-uca-mjoebergi-280863886fee409ab3c8168f07caa89f) by Bohdan Lvov (https://sketchfab.com/ostapblendercg) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
