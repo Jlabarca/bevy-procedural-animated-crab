@@ -1,6 +1,6 @@
 [package]
-name = "bevy-procedural-animated-spider"
-version = "0.1.1"
+name = "bevy-procedural-animated-crab"
+version = "0.2.0"
 edition = "2021"
 
 [profile.dev.package."*"]
@@ -14,7 +14,7 @@ bevy-inspector-egui = "0.14.0"
 bevy_mod_picking = "0.10.0"
 bevy_flycam = { git = "https://github.com/sburris0/bevy_flycam" }
 bevy_obj ="0.9.1"
-bevy_mod_inverse_kinematics = "0.2.0"
+bevy_mod_inverse_kinematics = { path = "./crates/bevy_mod_inverse_kinematics" }
 bevy_tweening = "0.6"
 bevy_infinite_grid =  { version = "0.5.2", path = "../bevy_infinite_grid" }
 interpolation = "0.2.0"
