@@ -1,13 +1,19 @@
 use std::time::Duration;
 
 use bevy::{
-    prelude::{Component, Entity, Transform, Vec3},
+    prelude::{Component, Entity, ReflectComponent, Vec3},
     reflect::Reflect,
     time::{Timer, TimerMode},
 };
 
+/**
+ * Using some fields with gui inspector for debugging purposes
+ * TODO: move to a different componenet
+ */
 #[derive(Component, Default, Reflect)]
+#[reflect(Component)]
 pub struct Player {
+    pub current_speed: Vec3,
     pub move_speed: f32,
     pub rotate_speed: f32,
     pub grounded: bool,
@@ -15,7 +21,15 @@ pub struct Player {
     pub jump_power: f32,
     pub jump_time: f32,
     pub jump_time_max: f32,
+    //move
+    pub walk_height: f32,
+    pub walk_width: f32,
+    pub walk_spread: Vec3,
+    pub pole_offset: Vec3,
+    pub pole_spread: Vec3,
 }
+#[derive(Component)]
+pub struct Ground {}
 
 #[derive(Component)]
 pub struct Foot {}
@@ -51,10 +65,10 @@ impl Default for FootAnchor {
         Self {
             foot: None,
             target: None,
-            animation_duration: Duration::from_secs_f32(0.25),
-            animation_timer: Timer::new(Duration::from_secs_f32(0.25), TimerMode::Once),
+            animation_duration: Duration::from_secs_f32(0.2),
+            animation_timer: Timer::new(Duration::from_secs_f32(0.2), TimerMode::Once),
             pos_error_margin: 0.16,
-            max_distance: 0.25,
+            max_distance: 0.55,
             moving: false,
             inverted: false,
         }
@@ -65,4 +79,5 @@ impl Default for FootAnchor {
 pub struct MoveAnchorEvent {
     pub anchor: Entity,
     pub target: Entity,
+    pub animation_duration: Duration,
 }
