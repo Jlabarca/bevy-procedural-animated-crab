@@ -1,5 +1,5 @@
 # Procedural animated crab using Bevy
-This project is about giving trying [bevy_mod_inverse_kinematics](https://github.com/Kurble/bevy_mod_inverse_kinematics/).
+This project is about trying [bevy_mod_inverse_kinematics](https://github.com/Kurble/bevy_mod_inverse_kinematics/).
 Using this great crab model by [Ischa Soetewey](https://sketchfab.com/3d-models/armored-crab-df63d81358944337af1add54f19821ad).
 
 ![](https://github.com/Jlabarca/bevy-procedural-animated-crab/blob/main/crab.gif?raw=true)
