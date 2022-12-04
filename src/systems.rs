@@ -19,9 +19,7 @@ pub fn anchor_move_event_trigger_system(
     mut move_event_writer: EventWriter<MoveAnchorEvent>,
 ) {
     for (target_entity, foot_target, target_transform) in foot_targets.iter() {
-        if let Ok((_, mut anchor, anchor_transform)) =
-            anchor_query.get_mut(foot_target.anchor)
-        {
+        if let Ok((_, mut anchor, anchor_transform)) = anchor_query.get_mut(foot_target.anchor) {
             let player = player_query.get(foot_target.owner).unwrap();
             let distance = anchor_transform
                 .translation()
@@ -40,7 +38,8 @@ pub fn anchor_move_event_trigger_system(
                 continue;
             }
 
-            if distance > player.walk_width { // not using anchor.max_distance anymore for debugginf purposes
+            if distance > player.walk_width {
+                // not using anchor.max_distance anymore for debugginf purposes
                 let speed = 2.0
                     + 15.0
                         * (player.current_speed.x.powi(2) + player.current_speed.z.powi(2))
@@ -85,7 +84,7 @@ pub fn anchor_move_event_system(
                 let tween = Tween::new(
                     EaseFunction::BounceInOut,
                     event.animation_duration,
-                    TransformPositionLens2 {
+                    TransformPositionLens {
                         start: anchor_transform.translation,
                         end: target_position,
                     },
@@ -95,21 +94,6 @@ pub fn anchor_move_event_system(
                 anchor.animation_timer.reset();
             }
         }
-    }
-}
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct TransformPositionLens2 {
-    /// Start value of the translation.
-    pub start: Vec3,
-    /// End value of the translation.
-    pub end: Vec3,
-}
-
-impl Lens<Transform> for TransformPositionLens2 {
-    fn lerp(&mut self, target: &mut Transform, ratio: f32) {
-        let value = self.start + (self.end - self.start) * ratio;
-        target.translation = value;
     }
 }
 
@@ -148,15 +132,15 @@ pub fn target_height_system(
             //target_transform.translation.y = hit_point.y;
             if let Err(ground) = ground_query.get(e) {
                 if let Ok(name) = name_query.get(e) {
-                    target_transform.translation.y += 0.4;
-                    info!("hit_point: {:?} at {:?}", name, hit_point);
-                    // move_event_writer.send(
-                    //     MoveAnchorEvent {
-                    //         anchor: foot_target.anchor,
-                    //         target: foot_target_entity,
-                    //         animation_duration: Duration::from_secs_f32(0.05),
-                    //     }
-                    // );
+                    target_transform.translation.y += 0.4; //todo: check why hit_point.y is not enough
+                                                           //info!("hit_point: {:?} at {:?}", name, hit_point);
+                                                           // move_event_writer.send(
+                                                           //     MoveAnchorEvent {
+                                                           //         anchor: foot_target.anchor,
+                                                           //         target: foot_target_entity,
+                                                           //         animation_duration: Duration::from_secs_f32(0.05),
+                                                           //     }
+                                                           // );
                 } else {
                     info!("hit_point: {:?}", hit_point);
                 }
@@ -171,7 +155,8 @@ pub fn pole_system(
 ) {
     for (foot_pole, mut target_transform) in foot_poles.iter_mut() {
         if let Ok((player, player_transform)) = player_query.get(foot_pole.owner) {
-            target_transform.translation = player_transform.translation + (foot_pole.pos_offset + player.pole_offset) * player.pole_spread;
+            target_transform.translation = player_transform.translation
+                + (foot_pole.pos_offset + player.pole_offset) * player.pole_spread;
         }
     }
 }
@@ -231,7 +216,7 @@ pub fn handle_move(
                 }
             }
             KeyCode::LShift => {
-                speed *= 1.77;
+                speed *= 1.7;
             }
             _ => {}
         }

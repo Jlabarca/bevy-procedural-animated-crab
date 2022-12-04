@@ -1,11 +1,11 @@
 Model Information:
-* title:	Dancing Crab - Uca Mjoebergi
-* source:	https://sketchfab.com/3d-models/dancing-crab-uca-mjoebergi-280863886fee409ab3c8168f07caa89f
-* author:	Bohdan Lvov (https://sketchfab.com/ostapblendercg)
+* title:	Armored Crab
+* source:	https://sketchfab.com/3d-models/armored-crab-df63d81358944337af1add54f19821ad
+* author:	Ischa Soetewey (https://sketchfab.com/SoeteweyIscha)
 
 Model License:
 * license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
 * requirements:	Author must be credited. Commercial use is allowed.
 
 If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
-This work is based on "Dancing Crab - Uca Mjoebergi" (https://sketchfab.com/3d-models/dancing-crab-uca-mjoebergi-280863886fee409ab3c8168f07caa89f) by Bohdan Lvov (https://sketchfab.com/ostapblendercg) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+This work is based on "Armored Crab" (https://sketchfab.com/3d-models/armored-crab-df63d81358944337af1add54f19821ad) by Ischa Soetewey (https://sketchfab.com/SoeteweyIscha) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

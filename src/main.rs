@@ -87,7 +87,7 @@ fn setup(
 
     // ground
     let ground_size = 200.1;
-    let ground_height = 0.1;
+    let ground_height = 0.01;
 
     commands
         .spawn((
@@ -116,14 +116,12 @@ fn setup(
     // player
     let crab_model = commands
         .spawn(SceneBundle {
-            scene: assets.load("crab/crab_final.gltf#Scene0"),
-            //transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            scene: assets.load("crab/crab.gltf#Scene0"),
             transform: Transform::from_matrix(Mat4::from_scale_rotation_translation(
                 Vec3::ONE,
-                Quat::from_axis_angle(Vec3::new(0.0, 1.0, 0.0), 180.0_f32.to_radians()),
-                Vec3::new(0.0, -0.4, 0.0),
+                Quat::from_axis_angle(Vec3::new(0.0, 1.0, 0.0), 180.0_f32.to_radians()), //model looks to positive Z by default
+                Vec3::new(0.0, -1.3, 0.0), //todo: set this dynamic so when collider step up, model step up too but lerping
             )),
-            //transform: Transform::from_xyz(0.0, 0.0, 0.0),
             visibility: Visibility { is_visible: true },
             ..default()
         })
@@ -144,23 +142,23 @@ fn setup(
                 jump_time_max: 0.3,
                 walk_height: 0.5,
                 walk_width: 0.5,
-                walk_spread: Vec3::new(1.1, 1.0, 1.3),
+                walk_spread: Vec3::new(1.1, 1.0, 1.3),//hardcoded for crab
                 pole_offset: Vec3::ZERO,
                 pole_spread: Vec3::ONE,
             },
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,
-            Collider::ball(0.3),
+            Collider::round_cylinder(1.3, 0.35, 0.20), //todo: fix changing collider size affect crab_model translation
             GravityScale(1.0),
             Ccd::enabled(),
             KinematicCharacterController {
                 //translation: Some(Vec3::new(0.0, -2.1, 0.0)),
-                offset: CharacterLength::Absolute(0.025),
-                max_slope_climb_angle: 55.0_f32.to_radians(),
+                offset: CharacterLength::Absolute(0.05),
+                max_slope_climb_angle: 70.0_f32.to_radians(), //slope would make autostep not trigger if the climb angle is too high
                 min_slope_slide_angle: 30.0_f32.to_radians(),
                 autostep: Some(CharacterAutostep {
-                    max_height: CharacterLength::Absolute(0.3),
-                    min_width: CharacterLength::Absolute(0.2),
+                    max_height: CharacterLength::Relative(1.25),
+                    min_width: CharacterLength::Relative(0.5),
                     include_dynamic_bodies: true,
                 }),
                 ..default()
@@ -170,48 +168,6 @@ fn setup(
         //     is_visible: false,
         // })
         .add_child(crab_model);
-
-    // cardinal boxes
-    let box_size = 0.1;
-    //north
-    commands.spawn((PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube {
-            size: box_size * 2.0,
-        })),
-        material: materials.add(Color::RED.into()),
-        transform: Transform::from_xyz(0.0, 0.0, -1.0),
-        ..default()
-    },));
-
-    //east
-    commands.spawn((PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube {
-            size: box_size * 2.0,
-        })),
-        material: materials.add(Color::GREEN.into()),
-        transform: Transform::from_xyz(1.0, 0.0, 0.0),
-        ..default()
-    },));
-
-    //south
-    commands.spawn((PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube {
-            size: box_size * 2.0,
-        })),
-        material: materials.add(Color::BLUE.into()),
-        transform: Transform::from_xyz(0.0, 0.0, 1.0),
-        ..default()
-    },));
-
-    //west
-    commands.spawn((PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube {
-            size: box_size * 2.0,
-        })),
-        material: materials.add(Color::YELLOW.into()),
-        transform: Transform::from_xyz(-1.0, 0.0, 0.0),
-        ..default()
-    },));
 
     spawn_boxes(commands, meshes, materials, 10);
 }
