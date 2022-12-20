@@ -8,6 +8,7 @@ use bevy_rapier3d::prelude::{
 };
 use bevy_tweening::{lens::*, *};
 
+
 pub fn anchor_move_event_trigger_system(
     time: Res<Time>,
     foot_targets: Query<(Entity, &FootTarget, &GlobalTransform), Without<FootAnchor>>,
@@ -39,7 +40,7 @@ pub fn anchor_move_event_trigger_system(
             }
 
             if distance > player.walk_width {
-                // not using anchor.max_distance anymore for debugginf purposes
+                // not using anchor.max_distance anymore for debugging purposes
                 let speed = 2.0
                     + 15.0
                         * (player.current_speed.x.powi(2) + player.current_speed.z.powi(2))
@@ -121,7 +122,7 @@ pub fn target_height_system(
 ) {
     for (foot_target_entity, foot_target, mut target_transform) in foot_targets.iter_mut() {
         //Calculate height using raycast
-        let ray_pos = target_transform.translation + Vec3::new(0.0, 2.0, 0.0);
+        let ray_pos = target_transform.translation + Vec3::new(0.0, 1.0, 0.0);
         let ray_dir = Vec3::new(0.0, -1.0, 0.0);
         let max_toi = Real::MAX;
         let solid = true;
@@ -132,22 +133,39 @@ pub fn target_height_system(
             //target_transform.translation.y = hit_point.y;
             if let Err(ground) = ground_query.get(e) {
                 if let Ok(name) = name_query.get(e) {
-                    target_transform.translation.y += 0.4; //todo: check why hit_point.y is not enough
-                                                           //info!("hit_point: {:?} at {:?}", name, hit_point);
-                                                           // move_event_writer.send(
-                                                           //     MoveAnchorEvent {
-                                                           //         anchor: foot_target.anchor,
-                                                           //         target: foot_target_entity,
-                                                           //         animation_duration: Duration::from_secs_f32(0.05),
-                                                           //     }
-                                                           // );
-                } else {
-                    info!("hit_point: {:?}", hit_point);
+                    target_transform.translation.y += 0.2; //todo: check why hit_point.y is not enough
+                    //info!("hit_point: {:?} at {:?}", name, hit_point);
+                    move_event_writer.send(
+                        MoveAnchorEvent {
+                            anchor: foot_target.anchor,
+                            target: foot_target_entity,
+                            animation_duration: Duration::from_secs_f32(0.02),
+                        }
+                    );
                 }
             }
         }
     }
 }
+
+// }
+// for (foot_target_entity, foot_target, mut target_transform) in foot_targets.iter_mut() {
+//     //Calculate height using raycast
+
+//     let shape = Collider::cuboid(0.33, 1.0, 0.33);
+//     let shape_pos = target_transform.translation + Vec3::new(0.0, -0.5, 0.0);
+//     let shape_rot = Quat::from_rotation_z(0.0);
+//     let shape_vel = Vec3::new(0.0, -0.4, 0.0);
+//     let max_toi = 4.0;
+//     let filter = QueryFilter::default().exclude_collider(foot_target.owner); //filtering crab body
+
+//     if let Some((entity, hit)) = rapier_context.cast_shape(
+//         shape_pos, shape_rot, shape_vel, &shape, max_toi, filter
+//     ) {
+//         println!("Hit the entity {:?} with the configuration: {:?}", entity, hit);
+//         info!("hit_point: {:?}", hit.);
+//     }
+// }
 
 pub fn pole_system(
     mut foot_poles: Query<(&FootPole, &mut Transform), Without<Player>>,

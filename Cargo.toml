@@ -8,14 +8,13 @@ opt-level = 3
 
 [dependencies]
 bevy = { version = "0.9", features=["jpeg"] }
-#bevy_rapier3d = "0.19.0"
-bevy_rapier3d = { version = "0.19.0", features = [ "simd-stable", "debug-render" ] }
-bevy-inspector-egui = "0.14.0"
-bevy_mod_picking = "0.10.0"
+bevy_rapier3d = { version = "0.19.0", features = [ "simd-stable", "debug-render", "dim3" ] }
+bevy-inspector-egui = "0.15.0"
+bevy_mod_picking = "0.11.0"
 bevy_flycam = { git = "https://github.com/sburris0/bevy_flycam" }
+bevy_infinite_grid = { git = "https://github.com/ForesightMiningSoftwareCorporation/bevy_infinite_grid", branch = "main" }
 bevy_obj ="0.9.1"
 bevy_mod_inverse_kinematics = { path = "./crates/bevy_mod_inverse_kinematics" }
 bevy_tweening = "0.6"
-bevy_infinite_grid =  { version = "0.5.2", path = "../bevy_infinite_grid" }
 interpolation = "0.2.0"
 rand = "0.8.4"

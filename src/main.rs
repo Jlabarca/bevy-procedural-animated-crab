@@ -8,22 +8,27 @@ use ik_systems::*;
 use rand::Rng;
 use systems::*;
 
-use bevy::{math::vec3, prelude::*};
+use bevy::prelude::*;
 use bevy_infinite_grid::{InfiniteGrid, InfiniteGridBundle, InfiniteGridPlugin};
 use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_mod_inverse_kinematics::InverseKinematicsPlugin;
 use bevy_obj::*;
-use bevy_rapier3d::{na::Matrix4, prelude::*};
-use bevy_tweening::{lens::*, *};
+use bevy_rapier3d::prelude::*;
+use bevy_tweening::*;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(ObjPlugin)
         .add_plugin(PlayerPlugin)
-        .add_plugin(InfiniteGridPlugin)
+        // .add_plugin(InfiniteGridPlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        // .add_plugin(RapierDebugRenderPlugin::default())
+        // .add_plugin(RapierDebugRenderPlugin {
+        //     enabled: true,
+        //     always_on_top: false,
+        //     style: DebugRenderStyle::default(),
+        //     mode: DebugRenderMode::default(),
+        // })
         .add_plugin(InverseKinematicsPlugin)
         .add_plugin(TweeningPlugin)
         .add_plugin(WorldInspectorPlugin::new())
@@ -120,7 +125,7 @@ fn setup(
             transform: Transform::from_matrix(Mat4::from_scale_rotation_translation(
                 Vec3::ONE,
                 Quat::from_axis_angle(Vec3::new(0.0, 1.0, 0.0), 180.0_f32.to_radians()), //model looks to positive Z by default
-                Vec3::new(0.0, -1.3, 0.0), //todo: set this dynamic so when collider step up, model step up too but lerping
+                Vec3::new(0.0, -1.27, 0.0), //todo: set this dynamic so when collider step up, model step up too but lerping
             )),
             visibility: Visibility { is_visible: true },
             ..default()
@@ -129,11 +134,11 @@ fn setup(
 
     commands
         .spawn((
-            TransformBundle::from(Transform::from_xyz(0.0, 2.0, 0.0)),
+            TransformBundle::from(Transform::from_xyz(0.0, 12.0, 0.0)),
             VisibilityBundle::default(),
             Player {
                 current_speed: Vec3::ZERO,
-                move_speed: 0.04,
+                move_speed: 0.02,
                 rotate_speed: 0.00,
                 grounded: false,
                 jumping: false,
@@ -142,25 +147,25 @@ fn setup(
                 jump_time_max: 0.3,
                 walk_height: 0.5,
                 walk_width: 0.5,
-                walk_spread: Vec3::new(1.1, 1.0, 1.3),//hardcoded for crab
-                pole_offset: Vec3::ZERO,
-                pole_spread: Vec3::ONE,
+                walk_spread: Vec3::new(0.7, 1.0, 0.7), //hardcoded for crab
+                pole_offset: Vec3::new(0.0, -2.0, 0.0),
+                pole_spread: Vec3::new(0.5, 0.5, 0.7),
             },
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,
-            Collider::round_cylinder(1.3, 0.35, 0.20), //todo: fix changing collider size affect crab_model translation
+            Collider::round_cylinder(1.0, 0.23, 0.13), //todo: fix changing collider size affect crab_model translation
             GravityScale(1.0),
             Ccd::enabled(),
             KinematicCharacterController {
                 //translation: Some(Vec3::new(0.0, -2.1, 0.0)),
-                offset: CharacterLength::Absolute(0.05),
-                max_slope_climb_angle: 70.0_f32.to_radians(), //slope would make autostep not trigger if the climb angle is too high
-                min_slope_slide_angle: 30.0_f32.to_radians(),
-                autostep: Some(CharacterAutostep {
-                    max_height: CharacterLength::Relative(1.25),
-                    min_width: CharacterLength::Relative(0.5),
-                    include_dynamic_bodies: true,
-                }),
+                offset: CharacterLength::Absolute(0.01),
+                // max_slope_climb_angle: 70.0_f32.to_radians(), //slope would make autostep not trigger if the climb angle is too high
+                // min_slope_slide_angle: 30.0_f32.to_radians(),
+                // autostep: Some(CharacterAutostep {
+                //     max_height: CharacterLength::Relative(1.25),
+                //     min_width: CharacterLength::Relative(0.5),
+                //     include_dynamic_bodies: true,
+                // }),
                 ..default()
             },
         ))
@@ -183,7 +188,7 @@ fn spawn_boxes(
     let num = 4;
     let mut rad: f32 = 0.5;
     let mut offset = -(num as f32) * (rad * 2.0 + rad) * 0.5;
-    //todo: add randomness
+
     for j in 0usize..size {
         for i in 0..num {
             for k in 0usize..num {

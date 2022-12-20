@@ -1,6 +1,15 @@
+use std::time::Duration;
+
 use crate::components::{Foot, FootAnchor, FootPole, FootTarget, Player};
 use bevy::prelude::*;
 use bevy_mod_inverse_kinematics::IkConstraint;
+struct KinematicLeg {
+    body_entity: Entity,
+    legs_spread: Vec<f32>, // general - no deberia ir aca
+    offset_spread: Vec<f32>,
+    chain_length: usize, // no recuerdo que era
+    joints_amount: usize,
+}
 
 pub fn on_added_setup_ik(
     mut commands: Commands,
@@ -13,7 +22,7 @@ pub fn on_added_setup_ik(
     player_query: Query<(Entity, With<Player>)>,
 ) {
     let player_entity = player_query.get_single().unwrap().0;
-    let spread = Vec3::new(1.4, -1.0, 1.2);
+    let spread = Vec3::new(1.5, -1.0, 1.33);
     let chain_length = 2;
     let joints_amount = 4;
 
@@ -32,10 +41,10 @@ pub fn on_added_setup_ik(
             &mut commands,
             &mut meshes,
             &mut materials,
-            spread * Vec3::new(-0.6, 0.01, -0.5),
+            spread * Vec3::new(-0.6, 0.01, -0.33),
             chain_length,
             20,
-            0.20,
+            0.14,
             false,
         );
 
@@ -207,10 +216,15 @@ fn generate_leg_kinematics(
                 ..default()
             },
             FootAnchor {
+                owner: player_entity,
                 foot: Some(foot_entity),
-                //max_distance: distance,
+                target: None,
+                animation_duration: Duration::from_secs_f32(distance * 1.2),
+                animation_timer: Timer::new(Duration::from_secs_f32(distance * 1.2), TimerMode::Once),
+                pos_error_margin: 0.2,
+                max_distance: distance,
+                moving: false,
                 inverted,
-                ..default()
             },
         ))
         .id();
@@ -246,7 +260,7 @@ fn generate_leg_kinematics(
         pole_angle: -std::f32::consts::FRAC_PI_2,
     });
 
-    // commands
+    // todo:adding leg as body child breaks everything rn, because it uses transform instead of global transform in some parts
     //.entity(player_entity)
     // .add_child(anchor)
     // .add_child(target)
